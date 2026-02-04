@@ -38,34 +38,28 @@ class GraphModule(nn.Module):
         training_nodes = self.node_features
         new_nodes = new_node_features.to(device)
 
-        # Combine training nodes + new nodes
         all_nodes = torch.cat([training_nodes, new_nodes], dim=0)
 
-        # Build edges for new nodes
         num_training = training_nodes.shape[0]
         num_new = new_nodes.shape[0]
         edge_rows = []
         edge_cols = []
 
-        # For each new node, find top-k neighbors in training nodes
-        sim = cosine_similarity(new_nodes.cpu().numpy(), training_nodes.cpu().numpy())  # (num_new, num_training)
+        sim = cosine_similarity(new_nodes.cpu().numpy(), training_nodes.cpu().numpy())
         for i in range(num_new):
             topk_idx = np.argsort(sim[i])[-k:]
             new_idx = num_training + i
             edge_rows.extend([new_idx]*k + topk_idx.tolist())
-            edge_cols.extend(topk_idx.tolist() + [new_idx]*k)  # bidirectional
+            edge_cols.extend(topk_idx.tolist() + [new_idx]*k)
 
-        # Combine with existing edges
         existing_edges = self.edge_index
         new_edges = torch.tensor([edge_rows, edge_cols], dtype=torch.long).to(device)
         combined_edge_index = torch.cat([existing_edges.to(device), new_edges], dim=1)
 
-        # Apply GAT layers
         x = self.gat1(all_nodes, combined_edge_index)
         x = F.elu(x)
         x = self.gat2(x, combined_edge_index)
 
-        # Return only new nodes' embeddings
         return x[-num_new:]
 
     def save(self, path):
