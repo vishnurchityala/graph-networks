@@ -64,10 +64,62 @@ Plotting samples from dataset;
 #         plt.subplot(1, batch_size, i + 1)
 #         plt.imshow(img)
 #         plt.axis("off")
-#         plt.title(f"Label: {labels[i]} Caption:{captions[i]}")
+#         plt.title(f"Label: {labels[i]}")
 
 #     plt.tight_layout()
 #     plt.show()
 
 
 # show_images(images, captions, labels)
+
+"""
+Code snippet to try-out final Graph with LDA reduced embeddings;
+Lolz might not be much usefull in future;
+"""
+# from models import BERTEmbedder, OpenClipVitEmbedder, LDALayer, GraphModule
+# from data_loader import MisogynyDataLoader
+# import numpy as np
+# import torch
+
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# data_loader = MisogynyDataLoader()
+# train_loader = data_loader.train_loader
+# test_loader = data_loader.test_loader
+
+# text_embedder = BERTEmbedder().to(device)
+# image_embedder = OpenClipVitEmbedder(device=device)
+
+# lda_mean = np.load("weights/combined_lda_mean.npy")
+# lda_coef = np.load("weights/combined_lda_coef.npy")
+# lda_layer = LDALayer(lda_mean, lda_coef)
+
+# graph_module = GraphModule.load(path="weights/graph_module.pth", device=device)
+
+# sample_images, sample_captions, sample_labels = [], [], []
+
+# for i, (images, captions, labels) in enumerate(train_loader):
+#     sample_images.append(images)
+#     sample_captions.extend(captions)
+#     sample_labels.extend(labels)
+#     if i >= 0:
+#         break
+
+# sample_images = torch.cat(sample_images, dim=0).to(device)
+
+# with torch.no_grad():
+#     text_emb = text_embedder(sample_captions).to("cpu")
+
+# with torch.no_grad():
+#     image_emb = image_embedder(sample_images).to("cpu")
+
+# combined_emb = np.concatenate([text_emb.numpy(), image_emb.numpy()], axis=1)
+# combined_tensor = torch.tensor(combined_emb, dtype=torch.float32)
+# lda_emb = lda_layer(combined_tensor)
+
+# contextualized_embeddings = graph_module(lda_emb, k=5)
+
+# print("Number of samples:", contextualized_embeddings.shape[0])
+# print("Contextualized embedding dimension:", contextualized_embeddings.shape[1])
+# for i in range(min(5, contextualized_embeddings.shape[0])):
+#     print(f"Sample {i} embedding:", contextualized_embeddings[i].detach().numpy())
