@@ -123,3 +123,32 @@ Lolz might not be much usefull in future;
 # print("Contextualized embedding dimension:", contextualized_embeddings.shape[1])
 # for i in range(min(5, contextualized_embeddings.shape[0])):
 #     print(f"Sample {i} embedding:", contextualized_embeddings[i].detach().numpy())
+
+
+"""
+Code snippet to try-out final Misogyny model;
+Ig we never know it will work or not;
+"""
+
+# import torch
+# from models import MisogynyModel
+# from data_loader import MisogynyDataLoader
+
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# data_loader = MisogynyDataLoader()
+# sample_loader = data_loader.test_loader
+
+# misogyny_model = MisogynyModel(device=device).to(device)
+# misogyny_model.eval()
+
+# images, captions, labels = next(iter(sample_loader))
+# images = images.to(device)
+# labels = labels.to(device)
+
+# with torch.no_grad():
+#     logits = misogyny_model(captions, images)
+#     predicted_class = torch.argmax(logits, dim=1)
+
+# print("Predicted label:", predicted_class.tolist())
+# print("Ground truth label:", labels.tolist())

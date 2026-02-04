@@ -10,6 +10,5 @@ class PCALayer(nn.Module):
         self.register_buffer("weight", components)
 
     def forward(self, x):
-        # x: (B, D)
         x = x - self.mean
-        return torch.matmul(x, self.weight.T)  # (B, K)
+        return torch.matmul(x, self.weight.T)

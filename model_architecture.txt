@@ -1,0 +1,108 @@
+MisogynyModel(
+  (text_embedder): BERTEmbedder(
+    (model_bert): BertModel(
+      (embeddings): BertEmbeddings(
+        (word_embeddings): Embedding(30522, 768, padding_idx=0)
+        (position_embeddings): Embedding(512, 768)
+        (token_type_embeddings): Embedding(2, 768)
+        (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+        (dropout): Dropout(p=0.1, inplace=False)
+      )
+      (encoder): BertEncoder(
+        (layer): ModuleList(
+          (0-11): 12 x BertLayer(
+            (attention): BertAttention(
+              (self): BertSelfAttention(
+                (query): Linear(in_features=768, out_features=768, bias=True)
+                (key): Linear(in_features=768, out_features=768, bias=True)
+                (value): Linear(in_features=768, out_features=768, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): BertSelfOutput(
+                (dense): Linear(in_features=768, out_features=768, bias=True)
+                (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): BertIntermediate(
+              (dense): Linear(in_features=768, out_features=3072, bias=True)
+              (intermediate_act_fn): GELUActivation()
+            )
+            (output): BertOutput(
+              (dense): Linear(in_features=3072, out_features=768, bias=True)
+              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+        )
+      )
+      (pooler): BertPooler(
+        (dense): Linear(in_features=768, out_features=768, bias=True)
+        (activation): Tanh()
+      )
+    )
+  )
+  (image_embedder): OpenClipVitEmbedder(
+    (model): CLIP(
+      (visual): VisionTransformer(
+        (conv1): Conv2d(3, 768, kernel_size=(32, 32), stride=(32, 32), bias=False)
+        (patch_dropout): Identity()
+        (ln_pre): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+        (transformer): Transformer(
+          (resblocks): ModuleList(
+            (0-11): 12 x ResidualAttentionBlock(
+              (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+              (attn): MultiheadAttention(
+                (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+              )
+              (ls_1): Identity()
+              (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+              (mlp): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): GELU(approximate='none')
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (ls_2): Identity()
+            )
+          )
+        )
+        (ln_post): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      )
+      (transformer): Transformer(
+        (resblocks): ModuleList(
+          (0-11): 12 x ResidualAttentionBlock(
+            (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+            )
+            (ls_1): Identity()
+            (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): GELU(approximate='none')
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (ls_2): Identity()
+          )
+        )
+      )
+      (token_embedding): Embedding(49408, 512)
+      (ln_final): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (lda_layer): LDALayer()
+  (text_pca_layer): PCALayer()
+  (image_pca_layer): PCALayer()
+  (graph_module): GraphModule(
+    (gat1): GATConv(4, 32, heads=4)
+    (gat2): GATConv(128, 64, heads=1)
+  )
+  (classification_layer): ClassificationLayer(
+    (classifier): Sequential(
+      (0): Linear(in_features=164, out_features=64, bias=True)
+      (1): ReLU()
+      (2): Dropout(p=0.9, inplace=False)
+      (3): Linear(in_features=64, out_features=4, bias=True)
+    )
+  )
+)
