@@ -1,3 +1,6 @@
+"""
+Code snippet to try-out Embedders.
+"""
 from models import BERTEmbedder, OpenClipVitEmbedder
 import requests
 from PIL import Image
