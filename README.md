@@ -1,4 +1,4 @@
-### Misogyny Classification - Overfitting King 👑
+### Misogyny Classification - Underfitting King 👑
 
 Wrote this entire model of design for just getting overfitting model with 50% accuracy, in hell i am will try new desing soon next week bbye.
 
