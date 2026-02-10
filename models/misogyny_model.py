@@ -13,10 +13,11 @@ from .classification_layer import ClassificationLayer
 class MisogynyModel(nn.Module):
     def __init__(self,
                  lda_weights_path=("weights/combined_lda_mean.npy", "weights/combined_lda_coef.npy"),
-                 pca_weights_path_text=("weights/bert_pca_components_100.npy", "weights/bert_pca_mean_100.npy"),
-                 pca_weights_path_image=("weights/clip_pca_components_100.npy", "weights/clip_pca_mean_100.npy"),
-                 pca_output_dim_text: int | None = 100,
-                 pca_output_dim_image: int | None = 100,
+                 # 400-dim PCA weights (files without dimension suffix)
+                 pca_weights_path_text=("weights/bert_pca_components.npy", "weights/bert_pca_mean.npy"),
+                 pca_weights_path_image=("weights/clip_pca_components.npy", "weights/clip_pca_mean.npy"),
+                 pca_output_dim_text: int | None = 400,
+                 pca_output_dim_image: int | None = 400,
                  graph_weights_path="weights/graph_module.pth",
                  device=None,
                  freeze_non_trainable=True):
