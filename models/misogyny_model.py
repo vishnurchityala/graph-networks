@@ -13,8 +13,10 @@ from .classification_layer import ClassificationLayer
 class MisogynyModel(nn.Module):
     def __init__(self,
                  lda_weights_path=("weights/combined_lda_mean.npy", "weights/combined_lda_coef.npy"),
-                 pca_weights_path_text=("weights/bert_pca_components_50.npy", "weights/bert_pca_mean_50.npy"),
-                 pca_weights_path_image=("weights/clip_pca_components_50.npy", "weights/clip_pca_mean_50.npy"),
+                 pca_weights_path_text=("weights/bert_pca_components_100.npy", "weights/bert_pca_mean_100.npy"),
+                 pca_weights_path_image=("weights/clip_pca_components_100.npy", "weights/clip_pca_mean_100.npy"),
+                 pca_output_dim_text: int | None = 100,
+                 pca_output_dim_image: int | None = 100,
                  graph_weights_path="weights/graph_module.pth",
                  device=None,
                  freeze_non_trainable=True):
@@ -33,14 +35,16 @@ class MisogynyModel(nn.Module):
         text_mean = np.load(pca_weights_path_text[1])
         self.text_pca_layer = PCALayer(
             mean=text_mean,
-            components=text_components
+            components=text_components,
+            output_dim=pca_output_dim_text
         ).to(self.device)
 
         image_components = np.load(pca_weights_path_image[0])
         image_mean = np.load(pca_weights_path_image[1])
         self.image_pca_layer = PCALayer(
             mean=image_mean,
-            components=image_components
+            components=image_components,
+            output_dim=pca_output_dim_image
         ).to(self.device)
 
         self.graph_module = GraphModule.load(
@@ -49,7 +53,11 @@ class MisogynyModel(nn.Module):
         ).to(self.device)
 
         graph_out_dim = self.graph_module.gat2.out_channels
-        input_dim = text_components.shape[0] + image_components.shape[0] + graph_out_dim
+        input_dim = (
+            self.text_pca_layer.output_dim
+            + self.image_pca_layer.output_dim
+            + graph_out_dim
+        )
 
         self.classification_layer = ClassificationLayer(
             input_dim=input_dim,
