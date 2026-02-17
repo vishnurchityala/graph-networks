@@ -5,4 +5,4 @@ from .lda_layer import LDALayer
 from .pca_layer import PCALayer
 from .graph_layer import GraphModule
 from .classification_layer import ClassificationLayer
-from .misogyny_model import MisogynyModel
+from .misogyny_model import MisogynyModel, MisogynyModelNoGraph, MisogynyModelPCAOnly
