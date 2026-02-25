@@ -22,7 +22,7 @@ from torch import nn, optim
 from sklearn.metrics import f1_score, precision_score, recall_score
 
 from data_loader import MisogynyDataLoader
-from models import MisogynyModel, MisogynyModelNoGraph, MisogynyModelPCAOnly
+from modules import MisogynyModel, MisogynyModelNoGraph, MisogynyModelPCAOnly
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -103,7 +103,7 @@ def train_model(model_name, ModelClass, epochs=30):
 
     os.makedirs("saved_models", exist_ok=True)
 
-    log_file = f"logs_{model_name}.csv"
+    log_file = f"logs/logs_{model_name}.csv"
     with open(log_file, "w") as f:
         f.write(
             "epoch,"

@@ -2,12 +2,12 @@ import torch
 import numpy as np
 from torch import nn
 
-from .bert_embedder import BERTEmbedder
-from .clip_embedder import OpenClipVitEmbedder
-from .pca_layer import PCALayer
-from .lda_layer import LDALayer
-from .graph_layer import GraphModule
-from .classification_layer import ClassificationLayer
+from ..embedders.bert_embedder import BERTEmbedder
+from ..embedders.clip_embedder import OpenClipVitEmbedder
+from ..layers import PCALayer
+from ..layers import LDALayer
+from ..layers import GraphModule
+from ..layers import ClassificationLayer
 
 
 class MisogynyModel(nn.Module):

@@ -76,7 +76,7 @@ Plotting samples from dataset;
 Code snippet to try-out final Graph with LDA reduced embeddings;
 Lolz might not be much usefull in future;
 """
-# from models import BERTEmbedder, OpenClipVitEmbedder, LDALayer, GraphModule
+# from modules import BERTEmbedder, OpenClipVitEmbedder, LDALayer, GraphModule
 # from data_loader import MisogynyDataLoader
 # import numpy as np
 # import torch
@@ -131,7 +131,7 @@ Ig we never know it will work or not;
 """
 
 # import torch
-# from models import MisogynyModel
+# from modules import MisogynyModel
 # from data_loader import MisogynyDataLoader
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -148,7 +148,40 @@ Ig we never know it will work or not;
 
 # with torch.no_grad():
 #     logits = misogyny_model(captions, images)
-#     predicted_class = torch.argmax(logits, dim=1)
+#     predicted_class = torch.argmax(logits, dim=1) 
 
 # print("Predicted label:", predicted_class.tolist())
 # print("Ground truth label:", labels.tolist())
+"""
+Creating Data-CSV file for Binary Classifier data loader
+"""
+# import csv
+
+# with open("train.tsv","r") as f:
+#     reader = csv.reader(f, delimiter="\t")
+#     train_csv = list(reader)
+
+# with open("data_binary.tsv","a", newline="") as f:
+#     writer = csv.writer(f, delimiter="\t")
+#     for it in train_csv:
+#         writer.writerow(["data/MAMI_2022_images/"+it[0], it[1], it[-1], "train"])
+
+
+# with open("test.tsv","r") as f:
+#     reader = csv.reader(f, delimiter="\t")
+#     test_csv = list(reader)
+
+# with open("data_binary.tsv","a", newline="") as f:
+#     writer = csv.writer(f, delimiter="\t")
+#     for it in test_csv[1:]:
+#         writer.writerow(["data/MAMI_2022_images/"+it[0], it[1], it[-1], "test"])
+
+
+# with open("train.tsv","r") as f:
+#     reader = csv.reader(f, delimiter="\t")
+#     val_csv = list(reader)
+
+# with open("data_binary.tsv","a", newline="") as f:
+#     writer = csv.writer(f, delimiter="\t")
+#     for it in val_csv[1:]:
+#         writer.writerow(["data/MAMI_2022_images/"+it[0], it[1], it[-1], "val"])
