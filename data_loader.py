@@ -134,8 +134,8 @@ class MisogynyBinaryDataset(Dataset):
         image = Image.open(row["file_name"]).convert("RGB")
         image = self.transform(image)
 
-        label = self.label_map[row["label"]]
         caption = row["text"]
+        label = row["label"]
 
         return image, caption, label
 

@@ -1,1 +1,2 @@
 from .misogyny_model import MisogynyModel, MisogynyModelNoGraph, MisogynyModelPCAOnly
+from .misogyny_binary_model import MisogynyBinaryModel, MisogynyBinaryModelNoGraph, MisogynyBinaryModelPCAOnly
