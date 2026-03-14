@@ -71,11 +71,28 @@ class GraphModule(nn.Module):
         print(f"GraphModule saved at {path}")
 
     @classmethod
-    def load(cls, path, k=20, hidden_dim=32, out_dim=64, heads=4, dropout=0.2, device=None):
+    def load(cls, path, k=20, hidden_dim=32, out_dim=64, heads=4, dropout=0.2, strict=True, device=None):
         checkpoint = torch.load(path, map_location=device or "cpu")
         node_features = checkpoint["node_features"].cpu().numpy()
         model = cls(node_features, k=k, hidden_dim=hidden_dim, out_dim=out_dim, heads=heads, dropout=dropout)
-        model.load_state_dict(checkpoint["gat_state_dict"])
+        state_dict = checkpoint["gat_state_dict"]
+
+        if strict:
+            model.load_state_dict(state_dict)
+        else:
+            model_state = model.state_dict()
+            compatible_state = {
+                key: value
+                for key, value in state_dict.items()
+                if key in model_state and model_state[key].shape == value.shape
+            }
+            skipped = sorted(set(state_dict.keys()) - set(compatible_state.keys()))
+            model.load_state_dict(compatible_state, strict=False)
+            if skipped:
+                print(
+                    f"GraphModule.load: skipped {len(skipped)} incompatible "
+                    f"parameter(s) from {path}"
+                )
         if device:
             model.to(device)
         print(f"GraphModule loaded from {path}")
