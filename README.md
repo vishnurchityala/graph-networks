@@ -1,7 +1,13 @@
-### Misogyny Classification - Underfitting King 👑
+# Multi-Graph Contextual Learning for Multimodal Meme Classification
 
-Wrote this entire model of design for just getting underfitting model with 50% accuracy, in hell i am will try new design soon next week bbye.
+## Model Architecture  
 
-Graph Attention Module I tried but okay, it is not working will do something for it.
+![Model Design](./images/MISOGYNY-MODEL.jpeg)
 
-![Model Desing](./images/model_design.png)
+## Evaluation Metrics  
+
+| Model | Accuracy | Precision | Recall | Macro F1 | Weighted F1 |
+|------|----------|----------|--------|----------|-------------|
+| LDA Graph | 0.9484 | 0.9140 | 0.9102 | 0.9106 | 0.9481 |
+| PCA (Two Modalities) | 0.9507 | 0.9271 | 0.8965 | 0.9099 | 0.9491 |
+| Three-Graph Integration | 0.9484 | 0.9003 | 0.9028 | 0.9015 | 0.9485 |
