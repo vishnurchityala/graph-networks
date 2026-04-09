@@ -1,0 +1,424 @@
+\documentclass[a4paper]{cas-sc}
+
+\usepackage[authoryear,longnamesfirst]{natbib}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{placeins}
+
+\begin{document}
+
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{.7}
+\def\textpagefraction{.1}
+
+\shorttitle{Multi-Graph Contextual Learning for Meme Classification}
+\shortauthors{Vishnu Chityala et al.}
+
+\makeatletter
+\def\printFirstPageNotes{}
+\makeatother
+
+\title[mode=title]{Multi-Graph Contextual Learning for Multimodal Meme Classification}
+
+% Authors
+\author[1]{Vishnu Chityala}
+\ead{e23cseu0049@bennett.edu.in}
+
+\author[1]{Harshil Uttaradhi}
+\ead{e23cseu0073@bennett.edu.in}
+
+\author[1]{Sutejas Hashia}
+\ead{e23cseu0047@bennett.edu.in}
+
+% Affiliation
+\affiliation[1]{organization={Bennett University},
+city={Greater Noida},
+state={Uttar Pradesh},
+country={India}}
+
+\cortext[cor1]{Corresponding author}
+
+\begin{abstract}
+This work proposes a multi-graph contextual classification framework for multimodal meme analysis that leverages relationships between samples rather than treating them independently. Experiments are conducted on the What’s Beneath Misogynous Stereotyping (WBMS) dataset containing meme images and captions annotated for misogynistic content. Text and image features are extracted using BERT and CLIP, respectively, and reduced using Principal Component Analysis (PCA). Three similarity graphs are constructed using cosine similarity based k-nearest neighbors: a text semantic graph, a visual semantic graph, and a class-discriminative graph obtained using Linear Discriminant Analysis (LDA). These graphs are processed using Graph Attention Networks (GAT) to learn contextual node representations which are fused for final classification.
+\end{abstract}
+
+\begin{keywords}
+Multimodal Meme Classification \sep Graph Neural Networks \sep Graph Attention Networks \sep Multimodal Learning
+\end{keywords}
+
+\maketitle
+
+\section{Introduction}
+
+Many researchers have spent time to address the challenges in multimodal meme analysis and classification. Latest studies have examined techniques that take advantage of both visual and textual modalities to optimize performance in tasks such as hate speech detection, misogyny identification, and offensive content classification in memes \cite{kanwar2025wbms} \cite{rehman2025contextaware}. All of these methods are majorly founded on pretrained models which includes transformer-based architectures for text and vision language models for images, followed by multimodal fusion techniques to integrate the extracted representations \cite{devlin2019bert} \cite{radford2021clip} \cite{aggarwal2026multimodal}. Although these techniques have shown strong potential in picking up on multimodal semantics, successfully modelling inter-modal relationships and  including contextual information across samples remains a major obstacle.
+\\
+
+Meme, as a form of online content, has a combination of images and textual information, which is generally used for the conveyance of humor, opinions, or views on societal issues. In most cases, this type of online content is used for promoting misogynistic stereotypes and stories about women \cite{kanwar2025wbms}. The detection of this type of online content is a challenge, as in most cases, the online content is implicit, sarcastic, or context-specific, which is not easy for text-based detection techniques. In most cases, the online content is only understandable in an interdisciplinary context, where the combination of images and textual information is used for conveying a different meaning compared to the individual components, which could be innocuous \cite{rehman2025contextaware}.
+\\
+
+In this respect, a lot of research has gone into addressing the long-existing challenges in multimodal meme classification and analysis. Over the last few years, several research works have explored how best to integrate both images and text, thus enhancing the efficiency of detecting hate speech, misogyny, and other forms of offensiveness in memes \cite{kanwar2025wbms,rehman2025contextaware}. These models begin with a pre-trained model, a transformer for text and a vision-language model for images, before moving on to multimodal fusion techniques, where both models are combined \cite{devlin2019bert,radford2021clip,aggarwal2026multimodal}. While the results are quite impressive in terms of comprehending the overall meaning of a multimodal combination, it is still a challenge to understand how both models interact and how best to integrate contextual information from other samples.
+\\
+
+The aim of this research is to study to check whether the modeling of meme relationships can strengthen multimodal classification performance. To achieve this, the formulated approach starts with extraction of text and image features with BERT and CLIP, as these models can extract deep semantic features from captions and images. The extracted features are of high dimensions, so Principal Component Analysis (PCA) is used to reduce them to a compact form that can be used for graphical depictions. Three graphs have been constructed based on the similarity of features: a text semantic graph to show text relationships, a visual semantic graph to represent image relationships, and a class discriminative graph using Linear Discriminant Analysis (LDA) to describe class discriminative information. These three graphs are then processed by a Graph Attention Network (GAT) to obtain contextual features by aggregating information from similar samples. The contextual features from all three graphs are then consolidated for meme classification.
+
+% \begin{figure}[!htbp]
+% \centering
+
+% \begin{tabular}{cc}
+
+% \includegraphics[height=3cm]{kitchen.jpeg} &
+% \includegraphics[height=3cm]{working.jpg} \\
+
+% (a) Kitchen & (b) Working \\
+
+% \includegraphics[height=3cm]{leadership.jpeg} &
+% \includegraphics[height=3cm]{shopping.jpg} \\
+
+% (c) Leadership & (d) Shopping
+
+% \end{tabular}
+
+% \caption{Example memes from the WBMS dataset representing different stereotype categories.}
+% \label{fig:samples}
+
+% \end{figure}
+
+\FloatBarrier 
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{tabular}{cc}
+
+\includegraphics[height=3cm]{kitchen.jpeg} &
+\includegraphics[height=3cm]{working.jpg} \\
+
+(a) Kitchen & (b) Working
+
+\end{tabular}
+
+\vspace{6pt}
+
+\begin{tabular}{cc}
+
+\includegraphics[height=3cm]{leadership.jpeg} &
+\includegraphics[height=3cm]{shopping.jpg} \\
+
+(c) Leadership & (d) Shopping
+
+\end{tabular}
+
+\captionof{figure}{Example memes from the WBMS dataset representing different stereotype categories.}
+\label{fig:samples}
+\end{minipage}
+\end{center}
+\FloatBarrier
+
+What's Beneath Misogynous Stereotyping (WBMS) dataset is used to carry out experiments for this study. It consists of multimodal memes that are a fusion of text captions and images. The memes are annotated for misogynistic content. Memes belong to classes such as cooking, leadership, shopping and work besides non-mysogynistic samples. The dataset is appropriate for testing multimodal methods of detection and classification of misogyny because it contains various types of misogynistic declarations in the memes.
+
+\section{Literature Review}
+
+Latest research about multimodal meme classification and graph-based learning has analyzed the unification of textual, visual, and relational information to refine classification performance. Current techniques mainly focus on two pathways: \cite{aggarwal2026multimodal} multimodal representation learning using pretrained models, and \cite{kang2021knngnn} graph-based methods that capture relationships between data samples.
+\\
+
+Transformer-based architectures have shown robust performance in multimodal meme analysis. For instance, the WBMS dataset introduced by \cite{kanwar2025wbms} proposed a multimodal framework which combines large language models with vision encoders resulting in strong performance in misogyny detection. Similarly, context-aware multimodal framework integrating cross-attention mechanisms with Graph Neural Networks(GNNs) were proposed by \cite{rehman2025contextaware}. It demonstrated that combining graph-based learning with contextual signals improves classification accuracy. More recent work by \cite{aggarwal2026multimodal} utilized knowledge distillation and hierarchical vision transformers to enhance multimodal feature extraction, further highlighting the importance of effective feature fusion.
+\\
+
+In parallel graph-based learning techniques have been thoroughly studied for modeling relationships between samples. \cite{li2024knngnn} presented KNN-GNN, which improves conventional Graph Neural Networks by including non-local neighbors in a learned feature subspace. This method handles shortcomings of homophily-based graphs and improves node classification performance. \cite{kang2021knngnn} revised the k-Nearest Neighbor algorithm in a graph neural network framework, enabling the model to learn similarity functions and neighbor influence automatically. Furthermore, \cite{wang2023knnkge} introduced a retrieval-based knowledge graph embedding technique(kNN-KGE), which shows how nearest-neighbor retrieval can improve reasoning in embedding spaces.
+\\
+
+Feature representation also plays a crucial role in these systems. \cite{zhu2024pcabert} demonstrated that PCA-based dimensionality reduction can significantly enhance embedding quality by reducing redundancy and improving semantic consistency. Furthermore, Graph Attention Networks (GAT) have been widely adopted for contextual representation learning due to their ability to assign importance weights to neighboring nodes, as highlighted in the comprehensive review by \cite{vrahatis2024gatreview}.
+\\
+
+Despite these advancements, most existing approaches either focus on multimodal fusion without explicitly modeling relationships between samples, or apply graph learning on a single modality. Few works explore the integration of multiple similarity graphs capturing complementary relationships. This limitation motivates the proposed multi-graph contextual learning framework, which constructs separate graphs for textual, visual, and class-discriminative relationships and integrates them using attention-based graph learning.
+
+\vspace{0.5em}
+\FloatBarrier
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\captionof{table}{Summary of Related Work in Multimodal Meme Classification}
+\label{tab:literature}
+
+\resizebox{\linewidth}{!}{
+\begin{tabular}{|c|p{2.5cm}|c|p{2.2cm}|p{2cm}|p{2.5cm}|p{2.5cm}|p{2.5cm}|}
+\hline
+\textbf{S.No.} & \textbf{Title} & \textbf{Year} & \textbf{Authors} & \textbf{Dataset} & \textbf{Methodology} & \textbf{Results} & \textbf{Limitations} \\
+\hline
+
+1 & What is Beneath Misogyny: Misogynous Memes Classification and Explanation & 2025 & \cite{kanwar2025wbms} & WBMS & LLM + CLIP multimodal model & F1-score 0.89 & Limited contextual modeling \\
+\hline
+
+2 & KNN-GNN: A Powerful Graph Neural Network Enhanced by Aggregating K-Nearest Neighbors in Common Subspace & 2024 & \cite{li2024knngnn} & Cora, Citeseer & KNN-based GNN & Improved node classification & Depends on neighbor selection \\
+\hline
+
+3 & k-Nearest Neighbor Learning with Graph Neural Networks & 2021 & \cite{kang2021knngnn} & UCI datasets & Graph-based kNN learning & Learned similarity functions & Limited multimodal support \\
+\hline
+
+4 & Reasoning Through Memorization: Nearest Neighbor Knowledge Graph Embeddings & 2023 & \cite{wang2023knnkge} & FB15k-237 & kNN-based KGE & Better reasoning in embeddings & High computational cost \\
+\hline
+
+5 & A Context-aware Attention and Graph Neural Network-based Multimodal Framework for Misogyny Detection & 2025 & \cite{rehman2025contextaware} & MAMI, MMHS150K & Multimodal + GNN + Attention & Macro-F1 87.95\% & Complex architecture \\
+\hline
+
+6 & Multimodal Hateful Meme Detection using Knowledge Distillation and Hierarchical Vision Transformer Framework  & 2026 & \cite{aggarwal2026multimodal} & HMC, MMHS150K & KD + ViT & Improved classification accuracy & Requires large data \\
+\hline
+
+7 & Application of PCA-Whitening Enhanced BERT for Chinese Semantic Understanding in Short Text Product Name Classification & 2024 & \cite{zhu2024pcabert} & GS1 China & PCA + BERT & Up to 99\% accuracy & Domain-specific dataset \\
+\hline
+
+8 & Graph Attention Networks: A Comprehensive Review of Methods and Applications  & 2024 & \cite{vrahatis2024gatreview} & Multiple & GAT review & Effective attention in GNNs & No experimental validation \\
+\hline
+
+\end{tabular}
+}
+\end{minipage}
+\end{center}
+\FloatBarrier
+
+\section{Dataset}
+
+The evaluations in this research are carried out on the What’s Beneath Misogynous Stereotyping (WBMS) dataset \cite{kanwar2025wbms}, a multimodal baseline for meme classification. The dataset comprises memes that integrate images and textual material, classified for misogynistic stereotypes. WBMS divides the memes into four classes: Kitchen, Leadership, Working, and Shopping. Every data point may have only an image, or a fusion of image, caption, and overlaid text, appropriate for assessing multimodal learning methods. The dataset has a total of 2130 samples. Table~\ref{tab:wbms_stats} briefly presents the distribution of memes throughout categories.
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\captionof{table}{Distribution of samples in the WBMS dataset.}
+\label{tab:wbms_stats}
+
+\begin{tabular}{lcc}
+\hline
+\textbf{Category} & \textbf{Count} & \textbf{Proportion} \\
+\hline
+Kitchen & 1076 & 0.51 \\
+Leadership & 534 & 0.25 \\
+Working & 321 & 0.15 \\
+Shopping & 199 & 0.09 \\
+\hline
+Total & 2130 & 1.00 \\
+\hline
+\end{tabular}
+\end{minipage}
+\end{center}
+
+The dataset is used to evaluate the effectiveness of the proposed multimodal and graph-based learning framework.
+
+
+
+\section{Methodology}
+
+The proposed methodology is designed as a multi-stage pipeline that systematically integrates multimodal feature extraction with relational learning. Initially, each meme is decomposed into its textual and visual components, from which high-dimensional feature representations are extracted using pretrained language and vision models. To enrich these representations with contextual information, multiple graphs are constructed where nodes correspond to individual memes and edges represent different forms of similarity, including textual semantic similarity, visual feature similarity, and latent topic-level relationships. These graphs provide complementary perspectives on the data distribution and enable the modeling of inter-sample dependencies. Each graph is then processed independently using Graph Attention Networks (GATs), which dynamically assign importance weights to neighboring nodes, allowing the model to learn context-aware embeddings that capture both local and global structure. The resulting embeddings from the different graphs are subsequently integrated through a fusion mechanism to obtain a unified representation that encapsulates multimodal and relational information. Finally, this fused representation is passed through a classification layer to predict the target label. This hierarchical and modular design ensures that the framework effectively leverages both modality-specific features and the underlying relational structure of the dataset.
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\includegraphics[width=0.9\linewidth]{MISOGYNY-MODEL.png}
+\captionof{figure}{Overview of the proposed multi-graph contextual learning framework.}
+\label{fig:methodology}
+\end{minipage}
+\end{center}
+\subsection{Multimodal Feature Extraction}
+
+In the first layer, semantic features are extracted from both the textual and visual components of a meme. The textual captions are processed using a BERT model, which generates contextual embeddings that capture how words interact within the given caption. At the same time, the image component is processed using a CLIP-ViT model, which produces visual embeddings representing how different elements interact within the image. These pretrained models are used because they provide strong and robust feature representations for their respective modalities. Since the extracted embeddings are typically high-dimensional, Principal Component Analysis (PCA) is applied to reduce the dimensionality of both text and image features. This step helps remove redundant information and produces compact feature representations that are more suitable for subsequent processing.
+
+\paragraph{Principal Component Analysis (PCA)}
+
+Given a feature matrix $\mathbf{X} \in \mathbb{R}^{n \times d}$, PCA projects it into a lower-dimensional space:
+
+\begin{equation}
+\mathbf{Z} = \mathbf{X}\mathbf{W}
+\end{equation}
+
+where $\mathbf{W}$ contains the top-$k$ eigenvectors of the covariance matrix:
+
+\begin{equation}
+\mathbf{C} = \frac{1}{n} \mathbf{X}^\top \mathbf{X}
+\end{equation}
+
+\subsection{Graph Construction}
+
+Using the reduced feature representations obtained from PCA, three k-Nearest Neighbor (kNN) graphs are constructed to model different relationships between memes in the dataset. Each graph captures a distinct type of similarity, enabling the model to incorporate complementary contextual information during representation learning.
+
+\paragraph{Cosine Similarity}
+
+The similarity between two feature vectors $\mathbf{x}_i$ and $\mathbf{x}_j$ is computed as:
+
+\begin{equation}
+\text{sim}(\mathbf{x}_i, \mathbf{x}_j) = 
+\frac{\mathbf{x}_i \cdot \mathbf{x}_j}
+{\|\mathbf{x}_i\| \|\mathbf{x}_j\|}
+\end{equation}
+
+\paragraph{Text Semantic Graph}
+
+A kNN graph is constructed using cosine similarity computed between the PCA-reduced BERT embeddings of meme captions. In this graph, each node represents a meme, and edges connect memes whose textual representations are semantically similar. This structure enables the model to capture linguistic relationships between captions and propagate information across semantically related memes.
+
+\paragraph{k-Nearest Neighbor Graph}
+
+An adjacency matrix $\mathbf{A}$ is constructed as:
+
+\begin{equation}
+A_{ij} =
+\begin{cases}
+1, & \text{if } \mathbf{x}_j \in \mathcal{N}_k(\mathbf{x}_i) \\
+0, & \text{otherwise}
+\end{cases}
+\end{equation}
+
+\paragraph{Visual Semantic Graph}
+
+A second kNN graph is constructed using cosine similarity between the PCA-reduced CLIP image embeddings. Nodes correspond to meme images, while edges connect visually similar memes. This graph captures visual relationships and shared semantic patterns present in the images.
+
+\paragraph{Class-Discriminative Graph}
+
+To incorporate class-level structural information, the multimodal features are projected into a discriminative space using Linear Discriminant Analysis (LDA). A kNN graph is then constructed based on similarities in this projected space. By connecting samples that exhibit similar class characteristics, this graph emphasizes class separability and improves the model’s ability to learn discriminative representations.
+
+\paragraph{Linear Discriminant Analysis (LDA)}
+
+LDA maximizes the ratio of between-class scatter to within-class scatter:
+
+\begin{equation}
+\mathbf{W}^* = \arg\max_{\mathbf{W}} 
+\frac{|\mathbf{W}^\top \mathbf{S}_B \mathbf{W}|}
+{|\mathbf{W}^\top \mathbf{S}_W \mathbf{W}|}
+\end{equation}
+
+\subsection{Graph Representation Learning}
+
+The constructed graphs are processed using Graph Attention Networks (GAT). In this framework, each node aggregates information from its neighboring nodes through an attention mechanism that assigns adaptive importance weights. This allows the model to effectively capture contextual dependencies and structural relationships between memes across different graphs.
+
+\paragraph{Graph Attention Network}
+
+The attention coefficient between node $i$ and node $j$ is computed as:
+
+\begin{equation}
+e_{ij} = \text{LeakyReLU}(\mathbf{a}^\top [\mathbf{W}\mathbf{h}_i \, || \, \mathbf{W}\mathbf{h}_j])
+\end{equation}
+
+The normalized attention weights are obtained using a softmax function:
+
+\begin{equation}
+\alpha_{ij} = \frac{\exp(e_{ij})}
+{\sum_{k \in \mathcal{N}(i)} \exp(e_{ik})}
+\end{equation}
+
+The updated node representation is then computed as:
+
+\begin{equation}
+\mathbf{h}_i' = \sigma \left( \sum_{j \in \mathcal{N}(i)} \alpha_{ij} \mathbf{W}\mathbf{h}_j \right)
+\end{equation}
+
+\subsection{Feature Fusion and Classification}
+
+The contextual embeddings obtained from the three graphs are integrated to form a unified multimodal representation. This fusion step combines complementary information from textual, visual, and class-discriminative perspectives, enabling the model to leverage both modality-specific and relational features for improved classification performance.
+
+\paragraph{Feature Fusion}
+
+The final representation is constructed by concatenating the embeddings learned from each graph:
+
+\begin{equation}
+\mathbf{h}_{final} = [\mathbf{h}_{text} \, || \, \mathbf{h}_{image} \, || \, \mathbf{h}_{lda}]
+\end{equation}
+
+This concatenation preserves modality-specific information while allowing the downstream classifier to learn interactions between different feature spaces.
+
+\paragraph{Classification}
+
+The fused representation is passed through a Multi-Layer Perceptron (MLP) classifier to produce the final prediction. The output probabilities are computed as:
+
+\begin{equation}
+\mathbf{y} = \text{Softmax}(\mathbf{W}_c \mathbf{h}_{final} + \mathbf{b})
+\end{equation}
+
+\paragraph{Class-Discriminative Analysis with LDA}
+
+To assess the effectiveness of the class-discriminative graph, we evaluate the clustering quality of LDA-projected features using K-Means. Experiments are conducted on text-only, image-only, and combined feature representations. The clustering performance is measured using Adjusted Rand Index (ARI) and Normalized Mutual Information (NMI).
+
+\FloatBarrier
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\captionof{table}{Clustering evaluation of LDA graphs using different feature sets}
+\label{tab:lda_clustering}
+\begin{tabular}{lcc}
+\hline
+\textbf{Feature Set} & \textbf{ARI} & \textbf{NMI} \\
+\hline
+Text-only LDA & 0.4132 & 0.4023 \\
+Image-only LDA & 0.2158 & 0.2329 \\
+Combined Text+Image LDA & 0.9269 & 0.8991 \\
+\hline
+\end{tabular}
+\end{minipage}
+\end{center}
+
+The results demonstrate that the combined multimodal representation significantly improves clustering quality, indicating stronger class separability compared to unimodal features.
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\includegraphics[width=0.3\linewidth]{text-lda-cluster.png}
+\includegraphics[width=0.3\linewidth]{image-lda-cluster.png}
+\includegraphics[width=0.3\linewidth]{combined-lda-graph.png}
+\captionof{figure}{Visual comparison of K-Means clustering on (a) text-only LDA, (b) image-only LDA, and (c) combined multimodal LDA representations}
+\label{fig:lda_clusters}
+\end{minipage}
+\end{center}
+\FloatBarrier
+
+\section{Results}
+
+In this section, we present the experimental results of our multimodal meme classification framework under different feature and graph configurations. For each setup, the best epoch is selected based on the highest validation accuracy. Metrics reported include \textbf{Accuracy}, \textbf{Precision}, \textbf{Recall}, \textbf{Macro F1}, and \textbf{Weighted F1}.
+
+\subsection{Performance Comparison Across Setups}
+
+Table~\ref{tab:train_metrics} summarizes the best epoch performance for three main setups: LDA graph (combined text+image features), PCA of two modalities, and Three-graph integration. Both training and validation metrics are reported.
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{tabular}{lccccc}
+\hline
+Model & Accuracy & Precision & Recall & Macro F1 & Weighted F1 \\
+\hline
+LDA Graph & 0.9237 & 0.8838 & 0.8702 & 0.8765 & 0.9228 \\
+PCA Two Modalities & 0.9577 & 0.9266 & 0.9264 & 0.9264 & 0.9577 \\
+Three-Graph Integration & 0.9331 & 0.8992 & 0.8917 & 0.8951 & 0.9326 \\
+\hline
+\end{tabular}
+\captionof{table}{Training metrics for different feature and graph setups.}
+\label{tab:train_metrics}
+\end{minipage}
+\end{center}
+
+\vspace{1em}
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{tabular}{lccccc}
+\hline
+Model & Accuracy & Precision & Recall & Macro F1 & Weighted F1 \\
+\hline
+LDA Graph & 0.9484 & 0.9140 & 0.9102 & 0.9106 & 0.9481 \\
+PCA Two Modalities & 0.9507 & 0.9271 & 0.8965 & 0.9099 & 0.9491 \\
+Three-Graph Integration & 0.9484 & 0.9003 & 0.9028 & 0.9015 & 0.9485 \\
+\hline
+\end{tabular}
+\captionof{table}{Test (validation) metrics for different feature and graph setups.}
+\label{tab:test_metrics}
+\end{minipage}
+\end{center}
+
+\subsection{Observations}
+
+\begin{itemize}
+    \item The LDA graph using combined text+image features demonstrates strong validation performance, highlighting the benefit of class-discriminative projections.  
+    \item The PCA-based two-modality representation achieves the highest training accuracy and competitive validation metrics, showing effective dimensionality reduction while retaining semantic information.  
+    \item The Three-graph integration performs comparably, indicating that integrating multiple complementary graphs improves contextual learning.  
+    \item Overall, integrating multimodal features with graph-based representations enhances classification performance across all configurations.
+\end{itemize}
+
+\bibliographystyle{cas-model2-names}
+\bibliography{cas-refs}
+
+\end{document}
